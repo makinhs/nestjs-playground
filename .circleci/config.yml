@@ -125,6 +125,4 @@ workflows:
             - bundle-dependencies
       - build-image:
           context:
-            - CIRCLE_CI_AWS_IAM_AGORO_EKS_PRODUCTION
-            - CONTRAST_API
           <<: *only-main

@@ -11,8 +11,7 @@ const MONGODB_OPTIONS = {
   useNewUrlParser: true,
   reconnectTries: 10, // Retry up to 10 times
   reconnectInterval: 500, // Reconnect every 500ms
-}
-
+};
 
 @Module({
   imports: [MongooseModule.forRoot(MONGODB_URL, { ...MONGODB_OPTIONS })],
