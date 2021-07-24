@@ -124,5 +124,4 @@ workflows:
           requires:
             - bundle-dependencies
       - build-image:
-          context:
           <<: *only-main
