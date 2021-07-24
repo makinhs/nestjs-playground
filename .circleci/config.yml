@@ -1,8 +1,5 @@
 version: 2.1
 
-#orbs:
-#  clair_scanner: yaradigitallabs/clair-scanner@0.0.12
-
 .directory: &directory
   working_directory: ~/workspace
 
@@ -107,98 +104,8 @@ jobs:
       - run:
           name: docker_build
           command: |
-            time DOCKER_BUILDKIT=1 docker build -t agoro-crm .
-#            time DOCKER_BUILDKIT=1 docker build -t ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME} .
-#            mkdir -p docker-cache
-#            docker save -o docker-cache/built-image.tar ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME}
-#      - save_cache:
-#          key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
-#          paths: ~/workspace/docker-cache
+            time DOCKER_BUILDKIT=1 docker build -t nestjs-playground .
 
-#  scan-image:
-#    executor: clair_scanner/default
-#    <<: *working_directory
-#    steps:
-#      - restore_cache:
-#          key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
-#      - clair_scanner/scan:
-#          image_file: /home/circleci/workspace/docker-cache/built-image.tar
-
-#  push-image:
-#    <<: *container_executor
-#    steps:
-#      - restore_cache:
-#          key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
-#      - setup_remote_docker:
-#          version: 19.03.13
-#      - run:
-#          name: docker_load
-#          command: |
-#            docker load -i /home/circleci/workspace/docker-cache/built-image.tar
-#      - run:
-#          name: docker_push
-#          command: |
-#            pip install --user awscli
-#            eval $(aws ecr get-login --registry-ids ${AGORO_PROD_ACCOUNTID} --no-include-email --region eu-central-1)
-#            GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
-#            docker tag ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME} ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME}:${GIT_HASH}
-#            docker push ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME}:${GIT_HASH}
-  deploy-stage:
-    # add machine
-    machine: true
-    working_directory: ~/agoro-adviser-backend
-    parameters:
-      env:
-        type: enum
-        enum: ["stage", "production"]
-        default: "stage"
-      CONTRAST__SERVER__ENVIRONMENT:
-        type: string
-      CONTRAST__SERVER__NAME:
-        type: string
-      CONTRAST__APPLICATION__NAME:
-        type: string
-    environment:
-      ENVIRONMENT: << parameters.env >>
-      HELMFILE_LOCATION: /home/app/infra/helmfile.yaml
-    steps:
-      - checkout
-      - run:
-          name: deploy
-          command: |
-            GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
-            eval $(aws ecr get-login --registry-ids ${AGORO_PROD_ACCOUNTID} --no-include-email --region eu-central-1)
-            sudo chmod -R 777  ~/agoro-adviser-backend
-            docker pull ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME}:${GIT_HASH}
-            docker run --add-host kubernetes.default.svc:127.0.0.1 --env CONTRAST__SERVER__ENVIRONMENT=<< parameters.CONTRAST__SERVER__ENVIRONMENT >> --env CONTRAST__SERVER__NAME=<< parameters.CONTRAST__SERVER__NAME >> --env CONTRAST__APPLICATION__NAME=<< parameters.CONTRAST__APPLICATION__NAME >> --env HELM3="true" --env ECR_AGORO_REPOSITORY=${ECR_AGORO_REPOSITORY} --env IMAGE_TAG=${GIT_HASH} --env THREAD_POOL_CORE_SIZE=${THREAD_POOL_CORE_SIZE} --env API_HOST=${KUBE_API_ADDR} --env BASTION_HOST=${BASTION_HOST} --env YARA_REGION="${YARA_REGION}" --env ENVIRONMENT="${ENVIRONMENT}" --env AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}  --env AWS_REGION="${AWS_DEFAULT_REGION}" --env KUBECFG_64=${KUBECONFIG} --env CONTRAST_API_KEY=${CONTRAST_API_KEY} --env CONTRAST_AGENT_SERVICE_KEY=${CONTRAST_AGENT_SERVICE_KEY} --env CONTRAST_AGENT_USERNAME=${CONTRAST_AGENT_USERNAME} --env CONTRAST_API_URL=${CONTRAST_API_URL} --env HELMFILE_LOCATION="/home/app/infra/helmfile.yaml" --volume /home/circleci/agoro-adviser-backend/infra:/home/app/infra ${ECR_AGORO_REPOSITORY}/${CIRCLE_CI_HELM_SCRIPTS_IMAGE}:${CIRCLE_CI_HELM_IMAGE_TAG} --deploy=true
-  deploy-production:
-    # add machine
-    machine: true
-    working_directory: ~/agoro-adviser-backend
-    parameters:
-      env:
-        type: enum
-        enum: ["stage", "production"]
-        default: "production"
-      CONTRAST__SERVER__ENVIRONMENT:
-        type: string
-      CONTRAST__SERVER__NAME:
-        type: string
-      CONTRAST__APPLICATION__NAME:
-        type: string
-    environment:
-      ENVIRONMENT: << parameters.env >>
-      HELMFILE_LOCATION: /home/app/infra/helmfile.yaml
-    steps:
-      - checkout
-      - run:
-          name: deploy
-          command: |
-            GIT_HASH=$(echo $CIRCLE_SHA1 | cut -c -7)
-            eval $(aws ecr get-login --registry-ids ${AGORO_PROD_ACCOUNTID} --no-include-email --region eu-central-1)
-            sudo chmod -R 777  ~/agoro-adviser-backend
-            docker pull ${ECR_AGORO_REPOSITORY}/${AGORO_ADVISER_BACKEND_REPONAME}:${GIT_HASH}
-            docker run --add-host kubernetes.default.svc:127.0.0.1 --env CONTRAST__SERVER__ENVIRONMENT=<< parameters.CONTRAST__SERVER__ENVIRONMENT >> --env CONTRAST__SERVER__NAME=<< parameters.CONTRAST__SERVER__NAME >> --env CONTRAST__APPLICATION__NAME=<< parameters.CONTRAST__APPLICATION__NAME >> --env HELM3="true" --env ECR_AGORO_REPOSITORY=${ECR_AGORO_REPOSITORY} --env IMAGE_TAG=${GIT_HASH} --env THREAD_POOL_CORE_SIZE=${THREAD_POOL_CORE_SIZE} --env API_HOST=${KUBE_API_ADDR} --env BASTION_HOST=${BASTION_HOST} --env YARA_REGION="${YARA_REGION}" --env ENVIRONMENT="${ENVIRONMENT}" --env AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}  --env AWS_REGION="${AWS_DEFAULT_REGION}" --env KUBECFG_64=${KUBECONFIG} --env CONTRAST_API_KEY=${CONTRAST_API_KEY} --env CONTRAST_AGENT_SERVICE_KEY=${CONTRAST_AGENT_SERVICE_KEY} --env CONTRAST_AGENT_USERNAME=${CONTRAST_AGENT_USERNAME} --env CONTRAST_API_URL=${CONTRAST_API_URL} --env HELMFILE_LOCATION="/home/app/infra/helmfile.yaml" --volume /home/circleci/agoro-adviser-backend/infra:/home/app/infra ${ECR_AGORO_REPOSITORY}/${CIRCLE_CI_HELM_SCRIPTS_IMAGE}:${CIRCLE_CI_HELM_IMAGE_TAG} --deploy=true
 workflows:
   version: 2.1
   pipeline:
@@ -221,48 +128,3 @@ workflows:
             - CIRCLE_CI_AWS_IAM_AGORO_EKS_PRODUCTION
             - CONTRAST_API
           <<: *only-main
-
-      #     - scan-image:
-      #         <<: *only-main
-      #         requires:
-      #           - build-image
-
-#      - push-image:
-#          context:
-#            - CIRCLE_CI_AWS_IAM_AGORO_EKS_PRODUCTION
-#            - CONTRAST_API
-#          <<: *only-main
-#          requires:
-#            #- scan-image
-#            - build-image
-
-#      - deploy-stage:
-#          CONTRAST__SERVER__NAME: "agoro-adviser-backend-Stage"
-#          CONTRAST__SERVER__ENVIRONMENT: "Devlopment"
-#          CONTRAST__APPLICATION__NAME: "agoro-adviser-backend"
-#          context:
-#            - CIRCLE_CI_AWS_IAM_AGORO_EKS_STAGE
-#            - CONTRAST_API
-#          env: stage
-#          <<: *only-main
-#          requires:
-#            - build-image
-#            #- scan-image
-#            - push-image
-#      - hold_production_deploy:
-#          type: approval
-#          <<: *only-main
-#          requires:
-#            - deploy-stage
-#
-#      - deploy-production:
-#          CONTRAST__SERVER__NAME: "agoro-adviser-backend-production"
-#          CONTRAST__SERVER__ENVIRONMENT: "Production"
-#          CONTRAST__APPLICATION__NAME: "agoro-adviser-backend"
-#          context:
-#            - CIRCLE_CI_AWS_IAM_AGORO_EKS_PRODUCTION
-#            - CONTRAST_API
-#          env: production
-#          <<: *only-main
-#          requires:
-#            - hold_production_deploy
