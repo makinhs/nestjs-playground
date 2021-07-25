@@ -3,7 +3,6 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Res,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { InjectConnection } from '@nestjs/mongoose';

@@ -38,10 +38,6 @@ jobs:
     <<: *directory
     docker:
       - image: circleci/node:14
-      - image: circleci/mongo
-        environment:
-          MONGO_USERNAME: mongouser
-          MONGO_PASSWORD: mongopass
     steps:
       - attach_workspace:
           at: ~/
@@ -74,6 +70,10 @@ jobs:
     <<: *directory
     docker:
       - image: circleci/node:14
+      - image: circleci/mongo
+        environment:
+          MONGO_USERNAME: mongouser
+          MONGO_PASSWORD: mongopass
     steps:
       - attach_workspace:
           at: ~/
