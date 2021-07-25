@@ -95,6 +95,11 @@ jobs:
     docker:
       - image: circleci/node:14
       - image: mongo:4.1.6-xenial
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: circle-test_test
     steps:
       - attach_workspace:
           at: ~/
@@ -135,12 +140,12 @@ workflows:
       - code-quality-run-e2e:
           requires:
             - bundle-dependencies
-#      - code-quality-run-unit:
-#          requires:
-#            - bundle-dependencies
+      - code-quality-run-unit:
+          requires:
+            - bundle-dependencies
       - build-image:
           <<: *only-main
           requires:
             - code-quality-run-e2e
-#            - code-quality-run-unit
+            - code-quality-run-unit
             - code-quality-run-lint
