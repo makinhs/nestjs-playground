@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { config as dotenvConfig } from 'dotenv';
 import { connections } from 'mongoose';
+import { TerminusModule } from '@nestjs/terminus';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 dotenvConfig();
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -18,7 +20,25 @@ describe('AppController', () => {
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      imports: [MongooseModule.forRoot(MONGODB_URL, { ...MONGODB_OPTIONS })],
+      imports: [
+        TerminusModule,
+        MongooseModule.forRoot(MONGODB_URL, { ...MONGODB_OPTIONS }),
+        TypeOrmModule.forRoot({
+          keepConnectionAlive: true,
+          type: 'postgres',
+          host: process.env.DB_HOST,
+          port: +process.env.DB_PORT,
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_DATABASE,
+          // autoLoadEntities: true,
+          // synchronize: true,
+          synchronize: !!process.env.DB_SYNCHRONIZE,
+          cli: {
+            entitiesDir: '**/entities/**/*.entity{.js,.ts}',
+          },
+        }),
+      ],
       controllers: [AppController],
       providers: [AppService],
     }).compile();
@@ -35,6 +55,5 @@ describe('AppController', () => {
   afterAll(async () => {
     // Closing the DB connection allows Jest to exit successfully.
     await connections[1].close();
-    // await app.close();
   });
 });

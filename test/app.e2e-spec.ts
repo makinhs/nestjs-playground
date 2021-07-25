@@ -27,7 +27,12 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/_status/healthz')
       .expect(200)
-      .expect({ db: { status: 'up' } });
+      .expect({
+        status: 'ok',
+        info: { postgres: { status: 'up' }, mongodb: { status: 'up' } },
+        error: {},
+        details: { postgres: { status: 'up' }, mongodb: { status: 'up' } },
+      });
   });
 
   afterAll(async () => {

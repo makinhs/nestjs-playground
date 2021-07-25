@@ -1,13 +1,21 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import {
+  HealthCheckService,
+  MongooseHealthIndicator,
+  TypeOrmHealthIndicator,
+} from '@nestjs/terminus';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
     @InjectConnection() private readonly connection: Connection,
+    private health: HealthCheckService,
+    private postgresDb: TypeOrmHealthIndicator,
+    private mongooseDb: MongooseHealthIndicator,
   ) {}
 
   @Get()
@@ -17,10 +25,9 @@ export class AppController {
 
   @Get('/_status/healthz')
   healthCheck() {
-    if (this.connection.readyState === 1) {
-      return { db: { status: 'up' } };
-    } else {
-      throw new HttpException('BAD_GATEWAY', HttpStatus.BAD_GATEWAY);
-    }
+    return this.health.check([
+      () => this.postgresDb.pingCheck('postgres'),
+      () => this.mongooseDb.pingCheck('mongodb'),
+    ]);
   }
 }
