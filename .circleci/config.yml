@@ -71,22 +71,12 @@ jobs:
     docker:
       - image: circleci/node:14
       - image: mongo:4.1.6-xenial
-#        environment:
-#          MONGO_USERNAME: mongouser
-#          MONGO_PASSWORD: mongopass
     steps:
       - attach_workspace:
           at: ~/
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "yarn.lock" }}
-#      - run:
-#          name: MongoDB Install
-#          command: |
-#            sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-#            echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-#            sudo apt-get update
-#            sudo apt-get install -y mongodb-org-shell
       - setup_remote_docker
       - run:
           name: Waiting for Mongo
@@ -99,12 +89,17 @@ jobs:
     <<: *directory
     docker:
       - image: circleci/node:14
+      - image: mongo:4.1.6-xenial
     steps:
       - attach_workspace:
           at: ~/
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "yarn.lock" }}
+      - setup_remote_docker
+      - run:
+          name: Waiting for Mongo
+          command: dockerize -wait tcp://localhost:27017 -timeout 1m
       - run:
           name: 'Run Unit Tests'
           command: yarn run test
@@ -135,8 +130,12 @@ workflows:
       - code-quality-run-e2e:
           requires:
             - bundle-dependencies
-#      - code-quality-run-unit:
-#          requires:
-#            - bundle-dependencies
-#      - build-image:
-#          <<: *only-main
+      - code-quality-run-unit:
+          requires:
+            - bundle-dependencies
+      - build-image:
+          <<: *only-main
+          requires:
+            - code-quality-run-e2e
+            - code-quality-run-unit
+            - code-quality-run-lint
