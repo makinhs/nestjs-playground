@@ -70,7 +70,7 @@ jobs:
     <<: *directory
     docker:
       - image: circleci/node:14
-      - image: circleci/mongo:4.4
+      - image: circleci/mongo:3.4.4
         environment:
           MONGO_USERNAME: mongouser
           MONGO_PASSWORD: mongopass
