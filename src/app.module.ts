@@ -9,7 +9,6 @@ dotenvConfig();
 console.log(process.env);
 console.log(process.env.MONGODB_URL);
 
-
 const MONGODB_URL = process.env.MONGODB_URL;
 const MONGODB_OPTIONS = {
   useNewUrlParser: true,

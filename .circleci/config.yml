@@ -70,7 +70,7 @@ jobs:
     <<: *directory
     docker:
       - image: circleci/node:14
-      - image: circleci/mongo
+      - image: circleci/mongo:4.4
         environment:
           MONGO_USERNAME: mongouser
           MONGO_PASSWORD: mongopass
@@ -92,6 +92,13 @@ jobs:
           name: Waiting for Mongo
 #          command: while ! nc -z 127.0.0.1 23017 ; do sleep 1 ; done
           command: dockerize -wait tcp://localhost:27017 -timeout 1m
+      - run:
+          name: Get versions
+          command: |
+            node -v
+            npm -v
+            mongo -v
+            mongo localhost --eval "db.version()"
       - run:
           name: 'Run E2E Tests'
           command: yarn run test:e2e
