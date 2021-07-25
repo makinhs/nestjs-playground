@@ -90,7 +90,8 @@ jobs:
       - setup_remote_docker
       - run:
           name: Waiting for Mongo
-          command: dockerize -wait tcp://localhost:27017 -timeout 1m
+          command: while ! nc -z 127.0.0.1 23017 ; do sleep 1 ; done
+#          command: dockerize -wait tcp://localhost:27017 -timeout 1m
       - run:
           name: 'Run E2E Tests'
           command: yarn run test:e2e
@@ -138,5 +139,5 @@ workflows:
       - code-quality-run-unit:
           requires:
             - bundle-dependencies
-      - build-image:
-          <<: *only-main
+#      - build-image:
+#          <<: *only-main
