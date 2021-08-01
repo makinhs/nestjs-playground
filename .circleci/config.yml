@@ -130,6 +130,8 @@ jobs:
           name: docker_build
           command: |
             time DOCKER_BUILDKIT=1 docker build -t nestjs-playground .
+            mkdir -p docker-cache
+            docker save -o docker-cache/built-image.tar ${ECR_AGORO_REPOSITORY}/nestjs-playground
       - save_cache:
           key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
           paths: ~/workspace/docker-cache
@@ -178,10 +180,10 @@ workflows:
             - bundle-dependencies
       - build-image:
           <<: *only-main
-          requires:
-            - run-e2e
-            - run-unit
-            - run-lint
+#          requires:
+#            - run-e2e
+#            - run-unit
+#            - run-lint
       - deploy-image:
           requires:
             - build-image
