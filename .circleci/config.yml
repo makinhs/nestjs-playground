@@ -151,6 +151,6 @@ workflows:
       - build-image:
           <<: *only-main
           requires:
-            - code-quality-run-e2e
-            - code-quality-run-unit
-            - code-quality-run-lint
+            - run-e2e
+            - run-unit
+            - run-lint
