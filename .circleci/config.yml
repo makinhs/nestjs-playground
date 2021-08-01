@@ -129,9 +129,9 @@ jobs:
       - run:
           name: docker_build
           command: |
-            time DOCKER_BUILDKIT=1 docker build -t $DOCKER_USER/nestjs-playground:$CIRCLE_BUILD_NUM .
+            time DOCKER_BUILDKIT=1 docker build -t $DOCKER_USER/nestjs-playground:$CIRCLE_SHA1 .
             mkdir -p docker-cache
-            docker save -o docker-cache/built-image.tar $DOCKER_USER/nestjs-playground:$CIRCLE_BUILD_NUM
+            docker save -o docker-cache/built-image.tar $DOCKER_USER/nestjs-playground:$CIRCLE_SHA1
       - save_cache:
           key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
           paths: ~/workspace/docker-cache
@@ -153,7 +153,7 @@ jobs:
       - run:
           name: pushing image to private dcoker
           command: |
-            docker push $DOCKER_USER/nestjs-playground:$CIRCLE_BUILD_NUM
+            docker push $DOCKER_USER/nestjs-playground:$CIRCLE_SHA1
 
 workflows:
   version: 2.1
