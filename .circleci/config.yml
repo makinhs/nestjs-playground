@@ -131,7 +131,7 @@ jobs:
           command: |
             time DOCKER_BUILDKIT=1 docker build -t $DOCKER_USER/nestjs-playground:$CIRCLE_BUILD_NUM .
             mkdir -p docker-cache
-            docker save -o docker-cache/built-image.tar nestjs-playground
+            docker save -o docker-cache/built-image.tar $DOCKER_USER/nestjs-playground:$CIRCLE_BUILD_NUM
       - save_cache:
           key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
           paths: ~/workspace/docker-cache
