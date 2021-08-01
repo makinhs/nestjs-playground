@@ -130,6 +130,28 @@ jobs:
           name: docker_build
           command: |
             time DOCKER_BUILDKIT=1 docker build -t nestjs-playground .
+      - save_cache:
+          key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths: ~/workspace/docker-cache
+  deploy-image:
+    <<: *container_executor
+    steps:
+      - restore_cache:
+          key: docker-image-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: docker_load
+          command: |
+            docker load -i /home/circleci/workspace/docker-cache/built-image.tar
+      - run:
+          name: login to private docker
+          command: |
+            echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run:
+          name: pushing image to private dcoker
+          command: |
+            docker push makinhs/nestjs-playground:$CIRCLE_BRANCH
 
 workflows:
   version: 2.1
@@ -160,3 +182,6 @@ workflows:
             - run-e2e
             - run-unit
             - run-lint
+      - deploy-image:
+          requires:
+            - build-image
