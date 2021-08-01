@@ -140,12 +140,18 @@ workflows:
           requires:
             - checkout-code
       - run-lint:
+          context:
+            - NESTJS_PLAYGROUND
           requires:
             - bundle-dependencies
       - run-e2e:
+          context:
+            - NESTJS_PLAYGROUND
           requires:
             - bundle-dependencies
       - run-unit:
+          context:
+            - NESTJS_PLAYGROUND
           requires:
             - bundle-dependencies
       - build-image:

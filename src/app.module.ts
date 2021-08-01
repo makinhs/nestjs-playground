@@ -10,9 +10,10 @@ dotenvConfig();
 
 const MONGODB_URL = process.env.MONGODB_URL;
 const MONGODB_OPTIONS = {
+  useUnifiedTopology: true,
   useNewUrlParser: true,
-  reconnectTries: 10, // Retry up to 10 times
-  reconnectInterval: 500, // Reconnect every 500ms
+  // reconnectTries: 10, // Retry up to 10 times
+  // reconnectInterval: 500, // Reconnect every 500ms
 };
 
 @Module({
@@ -24,9 +25,9 @@ const MONGODB_OPTIONS = {
       type: 'postgres',
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || 'root',
-      database: process.env.DB_DATABASE || 'circle-test_test',
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       // autoLoadEntities: true,
       // synchronize: true,
       synchronize: !!process.env.DB_SYNCHRONIZE,
